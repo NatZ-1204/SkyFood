@@ -1,0 +1,108 @@
+[
+  {
+    "id": 1,
+    "title": "Chicken Burger",
+    "category": "food",
+    "price": 35000,
+    "type": "chicken",
+    "rating": 4.2,
+    "img": "assets/img/chicken_burger.jpg",
+    "detail": "pages/details.html?id=1",
+    "summary": "Chicken Burger renyah dan juicy, dibuat dari bahan segar.",
+    "details": [
+      "Bahan utama: daging ayam, selada, keju, saus spesial",
+      "Porsi: 1 porsi",
+      "Saran penyajian: disantap hangat dengan kentang goreng",
+      "Alergen: mengandung gluten dan susu",
+      "Kalori (perkiraan): 550 kcal"
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Beef Burger",
+    "category": "food",
+    "price": 40000,
+    "type": "beef",
+    "rating": 4.7,
+    "img": "assets/img/beef_burger.png",
+    "detail": "pages/details.html?id=2",
+    "summary": "Beef Burger dengan patty sapi premium, juicy dan berempah.",
+    "details": [
+      "Bahan utama: daging sapi, tomat, selada, keju",
+      "Porsi: 1 porsi",
+      "Saran penyajian: cocok dengan saus BBQ dan acar",
+      "Alergen: mengandung gluten dan susu",
+      "Kalori (perkiraan): 680 kcal"
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Coke",
+    "category": "drink",
+    "price": 8000,
+    "drinkType": "soda",
+    "rating": 4.0,
+    "img": "assets/img/coke_can.avif",
+    "detail": "pages/details.html?id=3",
+    "summary": "Minuman bersoda klasik yang menyegarkan.",
+    "details": [
+      "Porsi: 330 ml",
+      "Saran penyajian: disajikan dingin dengan es",
+      "Alergen: tidak ada spesifik",
+      "Kalori (perkiraan): 140 kcal"
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Iced Tea",
+    "category": "drink",
+    "price": 5000,
+    "drinkType": "regular",
+    "rating": 3.9,
+    "img": "assets/img/iced_tea.jpg",
+    "detail": "pages/details.html?id=4",
+    "summary": "Teh dingin segar dengan sedikit pemanis.",
+    "details": [
+      "Bahan utama: teh, gula, es",
+      "Porsi: 300-350 ml",
+      "Saran penyajian: tambahkan lemon untuk rasa ekstra",
+      "Kalori (perkiraan): 90 kcal"
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Cheesecake",
+    "category": "dessert",
+    "price": 30000,
+    "dessertType": "heavy",
+    "rating": 4.8,
+    "img": "assets/img/cheesecake.jpg",
+    "detail": "pages/details.html?id=5",
+    "summary": "Cheesecake lembut dan creamy dengan saus stroberi.",
+    "details": [
+      "Bahan utama: krim keju, biskuit, gula",
+      "Porsi: 1 slice",
+      "Saran penyajian: dinginkan sebelum dihidangkan",
+      "Alergen: mengandung susu dan gluten",
+      "Kalori (perkiraan): 420 kcal per slice"
+    ]
+  },
+  {
+    "id": 6,
+    "title": "Fruit Salad",
+    "category": "dessert",
+    "price": 15000,
+    "dessertType": "light",
+    "rating": 4.1,
+    "img": "assets/img/fruit_salad.jpg",
+    "detail": "pages/details.html?id=6",
+    "summary": "Campuran buah segar musiman dengan dressing ringan.",
+    "details": [
+      "Bahan utama: apel, jeruk, anggur, pisang",
+      "Porsi: 1 mangkuk",
+      "Saran penyajian: sajikan dingin",
+      "Alergen: dapat mengandung biji atau kacang (opsional)",
+      "Kalori (perkiraan): 180 kcal"
+    ]
+  }
+]

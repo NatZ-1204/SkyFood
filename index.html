@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>SkyFood</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div data-insert-navbar data-page="index"></div>
+
+<!-- HERO -->
+<section class="hero-section">
+  <div class="container-fluid text-center hero-content">
+    <h1 class="fw-bold">Pesan Makanan Favoritmu</h1>
+    <p class="text-muted">Cepat, mudah, dan nyaman langsung dari rumah</p>
+  </div>
+</section>
+
+<!-- KATEGORI (moved into filter panel) -->
+
+<!-- MENU LIST -->
+<section class="container-fluid px-3">
+  <div class="row g-4">
+    <!-- FILTERS (LEFT) -->
+    <aside class="col-lg-3">
+      <div class="filters p-3">
+        <h6 class="fw-bold">Filter</h6>
+
+          <!-- Category buttons (moved from top) -->
+          <div class="mb-3">
+                    <div class="category-wrapper-filter d-flex gap-2">
+                      <button type="button" class="category-filter btn btn-outline-primary active" data-category="all">🔎 All</button>
+                      <button type="button" class="category-filter btn btn-outline-primary" data-category="food">🍔 Makanan</button>
+                      <button type="button" class="category-filter btn btn-outline-primary" data-category="drink">🥤 Minuman</button>
+                      <button type="button" class="category-filter btn btn-outline-primary" data-category="dessert">🍰 Dessert</button>
+                    </div>
+          </div>
+
+        <!-- category dropdown and price sort removed (category buttons used + price range only) -->
+        <div class="mb-3">
+          <label class="form-label">Rentang Harga</label>
+          <div class="d-flex align-items-center gap-2">
+            <input id="filter-price-min" type="number" class="form-control" style="width:110px;" value="0">
+            <span>—</span>
+            <input id="filter-price-max" type="number" class="form-control" style="width:110px;" value="50000">
+          </div>
+          <div class="two-range mt-2">
+            <input id="range-price" type="range" min="0" max="100000" step="1000" value="50000">
+          </div>
+        </div>
+
+        <!-- hidden helper to store selected category from buttons -->
+        <input type="hidden" id="filter-category" value="all">
+
+        <div class="mb-3">
+          <label class="form-label">Tipe Produk</label>
+          <div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="filter-chicken" value="chicken">
+              <label class="form-check-label" for="filter-chicken">Ayam</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="filter-beef" value="beef">
+              <label class="form-check-label" for="filter-beef">Beef</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Minuman</label>
+          <div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="filter-regular" value="regular">
+              <label class="form-check-label" for="filter-regular">Biasa</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="filter-soda" value="soda">
+              <label class="form-check-label" for="filter-soda">Bersoda</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Dessert</label>
+          <select id="filter-dessert" class="form-select">
+            <option value="all">Semua</option>
+            <option value="light">Ringan</option>
+            <option value="heavy">Berat</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Rating</label>
+          <select id="filter-rating" class="form-select">
+            <option value="default">Urutkan</option>
+            <option value="rating-asc">Terendah → Tertinggi</option>
+            <option value="rating-desc">Tertinggi → Terendah</option>
+          </select>
+        </div>
+
+        <div class="d-grid">
+          <button id="reset-filters" class="btn btn-outline-secondary btn-sm">Reset Filter</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- PRODUCT LIST (RIGHT) -->
+    <div class="col-lg-9">
+      <div class="row g-4" id="menu-list">
+        <!-- products will be rendered here -->
+      </div>
+      <div class="text-center mt-4 mb-5">
+        <button id="load-more" class="btn btn-outline-primary">Load more</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container py-5">
+    <div class="row gy-4">
+      <div class="col-md-3">
+        <h6 class="fw-bold">SkyFood</h6>
+        <ul class="list-unstyled small">
+          <li><a href="#">Tentang</a></li>
+          <li><a href="#">Karir</a></li>
+          <li><a href="#">Promo</a></li>
+        </ul>
+      </div>
+      <div class="col-md-3">
+        <h6 class="fw-bold">Bantuan</h6>
+        <ul class="list-unstyled small">
+          <li><a href="#">Syarat dan Ketentuan</a></li>
+          <li><a href="#">Kebijakan Privasi</a></li>
+          <li><a href="#">FAQ</a></li>
+          <li><a href="#">Hubungi</a></li>
+        </ul>
+      </div>
+      <div class="col-md-3">
+        <h6 class="fw-bold">Ikuti Kami</h6>
+        <ul class="list-unstyled small">
+          <li><a href="#">Facebook</a></li>
+          <li><a href="#">X</a></li>
+          <li><a href="#">Instagram</a></li>
+          <li><a href="#">TikTok</a></li>
+        </ul>
+      </div>
+      <div class="col-md-3">
+        <h6 class="fw-bold">Pembayaran</h6>
+        <div class="payment-icons d-flex flex-wrap gap-2 mt-2">
+          <span class="badge">BCA</span>
+          <span class="badge">BRI</span>
+          <span class="badge">BNI</span>
+          <span class="badge">VISA</span>
+          <span class="badge">Retail</span>
+          <span class="badge">eWallet</span>
+        </div>
+      </div>
+    </div>
+    <hr class="mt-4">
+    <div class="text-center small text-muted">© 2026 SkyFood. All rights reserved.</div>
+  </div>
+</footer>
+<script src="assets/js/navbar.js"></script>
+<script src="assets/js/ui-modals.js"></script>
+<script>
+  // We'll fetch products from a JSON endpoint (simulated)
+  let products = [];
+
+  // Pagination state
+  let currentPage = 1;
+  const pageSize = 6;
+  let lastFiltered = [];
+
+  // helper: show skeleton cards while loading
+  function renderSkeleton(count = 6) {
+    const container = document.getElementById('menu-list');
+    container.innerHTML = '';
+    for (let i=0;i<count;i++) {
+      const col = document.createElement('div');
+      col.className = 'col-md-4 col-sm-6';
+      col.innerHTML = `
+        <div class="menu-card skeleton">
+          <div class="skeleton-img"></div>
+          <div class="menu-body">
+            <div class="skeleton-text title"></div>
+            <div class="skeleton-text price"></div>
+            <div class="skeleton-btn"></div>
+          </div>
+        </div>`;
+      container.appendChild(col);
+    }
+  }
+
+  // fetch products (simulate server) with optional delay
+  function fetchProducts() {
+    renderSkeleton(6);
+    return fetch('assets/data/products.json')
+      .then(r => r.json())
+      .then(data => new Promise(resolve => setTimeout(()=>resolve(data), 400))); // simulate latency
+  }
+
+  function renderProducts(list, page = 1) {
+    const container = document.getElementById('menu-list');
+    if (!container) return;
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    const slice = list.slice(start, end);
+    if (page === 1) container.innerHTML = '';
+    if (list.length === 0) {
+      container.innerHTML = '<div class="col-12"><p class="text-muted">Tidak ada produk yang sesuai filter.</p></div>';
+      document.getElementById('load-more').style.display = 'none';
+      return;
+    }
+    slice.forEach(p => {
+      const col = document.createElement('div');
+      col.className = 'col-md-4 col-sm-6';
+      // determine image class per product to fine-tune object-position and fit
+      let imgClass = '';
+      if (p.type === 'chicken') imgClass = 'img-chicken';
+      else if (p.type === 'beef') imgClass = 'img-beef';
+      else if (/coke/i.test(p.title) || /coke/i.test(p.img)) imgClass = 'img-coke';
+      else if (/iced tea/i.test(p.title) || /iced_tea/i.test(p.img)) imgClass = 'img-icedtea';
+      else if (/cheesecake/i.test(p.title) || /cheesecake/i.test(p.img)) imgClass = 'img-cheesecake';
+      else if (/fruit salad/i.test(p.title) || /fruit_salad/i.test(p.img)) imgClass = 'img-salad';
+      col.innerHTML = `
+        <div class="menu-card fade-up">
+          <img src="${p.img}" alt="${p.title}" class="${imgClass}">
+          <div class="menu-body">
+            <h5>${p.title}</h5>
+            <p class="price">Rp ${p.price.toLocaleString('id-ID')}</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <a href="./pages/details.html?id=${p.id}" class="btn btn-outline-primary btn-sm">Detail</a>
+              <div class="card-controls">
+                <div class="qty-controls d-none" role="group">
+                  <button class="qty-decr">−</button>
+                  <div class="qty-display">1</div>
+                  <button class="qty-incr">+</button>
+                </div>
+                <button class="btn-add btn btn-primary btn-sm">+ Keranjang</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      container.appendChild(col);
+      // attach cart handlers + qty UI
+      const imgEl = col.querySelector('img');
+      const addBtn = col.querySelector('.btn-add');
+      const qtyControls = col.querySelector('.qty-controls');
+      const qtyDisplay = col.querySelector('.qty-display');
+      const decr = col.querySelector('.qty-decr');
+      const incr = col.querySelector('.qty-incr');
+
+      // initialize qty UI if item already in cart
+      (function initQty(){
+        const raw = localStorage.getItem('cartItems');
+        if (!raw) return;
+        try{
+          const items = JSON.parse(raw);
+          const ex = items.find(it=>Number(it.id)===Number(p.id));
+          if (ex && ex.qty>0){ qtyDisplay.textContent = ex.qty; qtyControls.classList.remove('d-none'); }
+        }catch(e){ /* ignore */ }
+      })();
+
+      if (addBtn) {
+        addBtn.addEventListener('click', async ()=>{
+          if (imgEl) await animateToCart(imgEl);
+          await addToCart(p.id, 1);
+          // show & update qty UI
+          const raw = localStorage.getItem('cartItems');
+          let qty = 1;
+          try{ const items = raw ? JSON.parse(raw) : []; const ex = items.find(it=>Number(it.id)===Number(p.id)); if (ex) qty = ex.qty; }catch(e){}
+          qtyDisplay.textContent = qty;
+          qtyControls.classList.remove('d-none');
+        });
+      }
+
+      if (incr) incr.addEventListener('click', async ()=>{
+        const newQty = await changeCartQty(p.id, 1);
+        qtyDisplay.textContent = newQty;
+      });
+      if (decr) decr.addEventListener('click', async ()=>{
+        const newQty = await changeCartQty(p.id, -1);
+        if (newQty <= 0) { qtyControls.classList.add('d-none'); qtyDisplay.textContent = '0'; }
+        else qtyDisplay.textContent = newQty;
+      });
+    });
+    // Load more visibility
+    const loadMore = document.getElementById('load-more');
+    if (end < list.length) loadMore.style.display = 'inline-block'; else loadMore.style.display = 'none';
+  }
+
+  function updateCartCount(){
+    const count = Number(localStorage.getItem('cartCount') || 0);
+    const cartBtn = document.querySelector('.navbar-glass .cart');
+    if (cartBtn) cartBtn.textContent = '🛒 ' + count;
+  }
+
+  // add structured cart helper: stores array of {id, qty} in localStorage under 'cartItems'
+  async function addToCart(productId, amount = 1){
+    const raw = localStorage.getItem('cartItems');
+    let items = raw ? JSON.parse(raw) : [];
+    const existing = items.find(it => Number(it.id) === Number(productId));
+    if (existing) existing.qty = Number(existing.qty) + Number(amount);
+    else items.push({ id: Number(productId), qty: Number(amount) });
+    localStorage.setItem('cartItems', JSON.stringify(items));
+    // also maintain cartCount for compatibility
+    const total = items.reduce((s,i)=>s+Number(i.qty),0);
+    localStorage.setItem('cartCount', total);
+    updateCartCount();
+    if (typeof pulseCartBadge === 'function') pulseCartBadge();
+  }
+
+  // animate image flying to navbar cart
+  function animateToCart(imgEl){
+    return new Promise((resolve)=>{
+      try{
+        const cartBtn = document.querySelector('.navbar-glass .cart');
+        if (!cartBtn || !imgEl) return resolve();
+        const imgRect = imgEl.getBoundingClientRect();
+        const cartRect = cartBtn.getBoundingClientRect();
+        const clone = imgEl.cloneNode(true);
+        clone.classList.add('fly-image-clone');
+        clone.style.width = imgRect.width + 'px';
+        clone.style.height = imgRect.height + 'px';
+        clone.style.left = imgRect.left + 'px';
+        clone.style.top = imgRect.top + 'px';
+        document.body.appendChild(clone);
+        // force layout
+        void clone.offsetWidth;
+        const translateX = cartRect.left + (cartRect.width/2) - (imgRect.left + imgRect.width/2);
+        const translateY = cartRect.top + (cartRect.height/2) - (imgRect.top + imgRect.height/2);
+        const scale = 0.18;
+        clone.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+        clone.style.opacity = '0.6';
+        setTimeout(()=>{ try{ if (clone && clone.parentNode) clone.parentNode.removeChild(clone); }catch(e){} resolve(); }, 680);
+      }catch(e){ resolve(); }
+    });
+  }
+
+  // change cart item qty by delta (positive or negative)
+  async function changeCartQty(productId, delta){
+    const raw = localStorage.getItem('cartItems');
+    let items = raw ? JSON.parse(raw) : [];
+    const idx = items.findIndex(it => Number(it.id) === Number(productId));
+    if (idx === -1){
+      if (delta > 0) items.push({ id: Number(productId), qty: Number(delta) });
+    } else {
+      items[idx].qty = Number(items[idx].qty) + Number(delta);
+      if (items[idx].qty <= 0) items.splice(idx,1);
+    }
+    localStorage.setItem('cartItems', JSON.stringify(items));
+    const total = items.reduce((s,i)=>s+Number(i.qty),0);
+    localStorage.setItem('cartCount', total);
+    updateCartCount();
+    return items.find(it=>Number(it.id)===Number(productId))?.qty || 0;
+  }
+
+  // Apply filters and sorting
+  function applyFilters() {
+    const category = document.getElementById('filter-category')?.value || 'all';
+    const priceSort = document.getElementById('filter-price')?.value || 'default';
+    const ratingSort = document.getElementById('filter-rating')?.value || 'default';
+    const chicken = document.getElementById('filter-chicken')?.checked || false;
+    const beef = document.getElementById('filter-beef')?.checked || false;
+    const regular = document.getElementById('filter-regular')?.checked || false;
+    const soda = document.getElementById('filter-soda')?.checked || false;
+    const dessertType = document.getElementById('filter-dessert')?.value || 'all';
+
+    let result = products.slice();
+
+    if (category !== 'all') result = result.filter(p => p.category === category);
+
+    // type filters (chicken/beef)
+    if (chicken || beef) {
+      result = result.filter(p => (chicken && p.type === 'chicken') || (beef && p.type === 'beef'));
+    }
+
+    // drink filters
+    if (regular || soda) {
+      result = result.filter(p => (regular && p.drinkType === 'regular') || (soda && p.drinkType === 'soda'));
+    }
+
+    // dessert type
+    if (dessertType !== 'all') result = result.filter(p => p.dessertType === dessertType);
+
+    // search query from navbar
+    const q = document.querySelector('.search-box')?.value?.toLowerCase() || '';
+    if (q) {
+      result = result.filter(p => p.title.toLowerCase().includes(q));
+    }
+
+    // filter by price range inputs
+    const minPrice = Number(document.getElementById('filter-price-min').value || 0);
+    const maxPrice = Number(document.getElementById('filter-price-max').value || 100000);
+    result = result.filter(p => p.price >= minPrice && p.price <= maxPrice);
+
+    // sorting
+    if (priceSort === 'price-asc') result.sort((a,b)=>a.price-b.price);
+    if (priceSort === 'price-desc') result.sort((a,b)=>b.price-a.price);
+    if (ratingSort === 'rating-asc') result.sort((a,b)=>a.rating-(b.rating||0));
+    if (ratingSort === 'rating-desc') result.sort((a,b)=> (b.rating||0)-(a.rating||0));
+
+    // save last filtered and reset pagination
+    lastFiltered = result;
+    currentPage = 1;
+    saveFiltersToURL();
+    renderProducts(result, currentPage);
+  }
+
+  // Wire up filter controls
+  document.addEventListener('DOMContentLoaded', () => {
+    // initial load: fetch products from JSON
+    fetchProducts().then(data=>{
+      products = data.map(p => ({ ...p, img: p.img.replace(/^\.\./,'assets') }));
+      lastFiltered = products.slice();
+      updateCartCount();
+      applyFilters();
+    }).catch(()=>{
+      // fallback to empty
+      products = [];
+      renderProducts([]);
+    });
+
+    // controls
+    ['filter-category','filter-rating','filter-dessert','filter-chicken','filter-beef','filter-regular','filter-soda'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('change', applyFilters);
+    });
+
+    // single slider wiring (controls max price)
+    const rangePrice = document.getElementById('range-price');
+    const minInput = document.getElementById('filter-price-min');
+    const maxInput = document.getElementById('filter-price-max');
+    if (rangePrice) {
+      // initialize numeric max to match range
+      if (maxInput) maxInput.value = rangePrice.value;
+      rangePrice.addEventListener('input', ()=>{
+        if (maxInput) maxInput.value = rangePrice.value;
+        applyFilters();
+      });
+      if (maxInput) maxInput.addEventListener('change', ()=>{ rangePrice.value = maxInput.value; applyFilters(); });
+    }
+    if (minInput) minInput.addEventListener('change', applyFilters);
+
+    
+
+    // also run filters when pressing search button or submitting form
+    document.querySelector('.search-form').addEventListener('submit', (ev)=>{
+      ev.preventDefault();
+      applyFilters();
+    });
+
+    // wire category buttons inside filters
+    document.querySelectorAll('.category-filter').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        // toggle active class (single select)
+        document.querySelectorAll('.category-filter').forEach(b => b.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+        const cat = e.currentTarget.getAttribute('data-category') || 'all';
+        document.getElementById('filter-category').value = (cat === 'all' ? 'all' : cat);
+        applyFilters();
+      });
+    });
+
+    // ensure reset clears category buttons
+    // load-more click
+    document.getElementById('load-more').addEventListener('click', () => {
+      currentPage++;
+      renderProducts(lastFiltered, currentPage);
+    });
+
+    document.getElementById('reset-filters').addEventListener('click', (e)=>{
+      e.preventDefault();
+      const fc = document.getElementById('filter-category'); if (fc) fc.value = 'all';
+      const fp = document.getElementById('filter-price'); if (fp) fp.value = 'default';
+      const fr = document.getElementById('filter-rating'); if (fr) fr.value = 'default';
+      const fd = document.getElementById('filter-dessert'); if (fd) fd.value = 'all';
+      ['filter-chicken','filter-beef','filter-regular','filter-soda'].forEach(i=>{ const el=document.getElementById(i); if (el) el.checked=false; });
+      document.querySelectorAll('.category-filter').forEach(b=>b.classList.remove('active'));
+      // set default category button to All
+      const defaultBtn = document.querySelector('.category-filter[data-category="all"]');
+      if (defaultBtn) defaultBtn.classList.add('active');
+      document.querySelector('.search-box').value = '';
+      // reset price inputs
+      const minInput = document.getElementById('filter-price-min'); if (minInput) minInput.value = 0;
+      const maxInput = document.getElementById('filter-price-max'); if (maxInput) maxInput.value = 50000;
+      const rangePrice = document.getElementById('range-price'); if (rangePrice) rangePrice.value = 50000;
+      applyFilters();
+    });
+
+    // restore filters from URL if present
+    loadFiltersFromURL();
+    // applyFilters will be called after initial fetch completes
+  });
+
+  // Save filter state to URL (query string)
+  function saveFiltersToURL(){
+    const params = new URLSearchParams();
+    const q = document.querySelector('.search-box')?.value;
+    if (q) params.set('q', q);
+    const catEl = document.getElementById('filter-category'); const cat = catEl?.value;
+    if (cat && cat !== 'all') params.set('category', cat);
+    const priceEl = document.getElementById('filter-price'); const priceSort = priceEl?.value;
+    if (priceSort && priceSort !== 'default') params.set('price', priceSort);
+    const ratingEl = document.getElementById('filter-rating'); const rating = ratingEl?.value;
+    if (rating && rating !== 'default') params.set('rating', rating);
+    const minEl = document.getElementById('filter-price-min'); const min = minEl?.value;
+    if (min) params.set('min', min);
+    const maxEl = document.getElementById('filter-price-max'); const max = maxEl?.value;
+    if (max) params.set('max', max);
+    history.replaceState(null,'', location.pathname + (params.toString() ? '?' + params.toString() : ''));
+  }
+
+  function loadFiltersFromURL(){
+    const params = new URLSearchParams(location.search);
+    if (params.has('q')) document.querySelector('.search-box').value = params.get('q');
+    if (params.has('category')) document.getElementById('filter-category').value = params.get('category');
+    if (params.has('price')) document.getElementById('filter-price').value = params.get('price');
+    if (params.has('rating')) document.getElementById('filter-rating').value = params.get('rating');
+    if (params.has('min')) document.getElementById('filter-price-min').value = params.get('min');
+    if (params.has('max')) document.getElementById('filter-price-max').value = params.get('max');
+    if (params.has('max')) {
+      const rp = document.getElementById('range-price'); if (rp) rp.value = params.get('max');
+      const maxInput = document.getElementById('filter-price-max'); if (maxInput) maxInput.value = params.get('max');
+    }
+    // set category button active if category param present
+    const cat = document.getElementById('filter-category')?.value || 'all';
+    document.querySelectorAll('.category-filter').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector(`.category-filter[data-category="${cat}"]`);
+    if (btn) btn.classList.add('active');
+  }
+</script>
+
+</body>
+</html>

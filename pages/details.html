@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>SkyFood - Detail Produk</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<div data-insert-navbar data-page="detail"></div>
+
+<div class="container mt-5 pt-4">
+
+  <div id="detail-root" class="detail-layout">
+    <!-- content injected by JS -->
+  </div>
+
+<script src="../assets/js/navbar.js"></script>
+<script src="../assets/js/ui-modals.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', ()=>{
+  function qparam(name){
+    const p = new URLSearchParams(location.search);
+    return p.has(name) ? p.get(name) : null;
+  }
+
+  const id = Number(qparam('id')) || null;
+  if (!id) {
+    document.getElementById('detail-root').innerHTML = '<p class="text-danger">Produk tidak ditemukan (id tidak diberikan).</p>';
+    return;
+  }
+
+  fetch('../assets/data/products.json').then(r=>r.json()).then(list=>{
+    const p = list.find(x => Number(x.id) === id);
+    if (!p) {
+      document.getElementById('detail-root').innerHTML = '<p class="text-danger">Produk tidak ditemukan.</p>';
+      return;
+    }
+    // render
+    const pageTitleEl = document.getElementById('page-title');
+    if (pageTitleEl) pageTitleEl.textContent = 'SkyFood - ' + p.title;
+    const imgPath = (p.img && p.img.startsWith('assets')) ? ('../' + p.img) : (p.img || '../assets/img/placeholder.png');
+    const leftClass = p.type === 'beef' ? 'detail-image-beef' : (p.type === 'chicken' ? 'detail-image-chicken' : 'detail-image');
+    const container = document.getElementById('detail-root');
+    // build description HTML: summary + bullet points
+    let descHTML = '';
+    if (p.summary) descHTML += `<p class="description">${p.summary}</p>`;
+    if (Array.isArray(p.details) && p.details.length) {
+      descHTML += '<ul class="list-unstyled text-muted small" style="margin-top:8px">';
+      p.details.forEach(d => { descHTML += `<li>• ${d}</li>`; });
+      descHTML += '</ul>';
+    }
+
+    container.innerHTML = `
+      <div class="detail-image ${leftClass}" style="background-image: url('${imgPath}');"></div>
+      <div class="detail-info">
+        <h2 class="fw-bold">${p.title}</h2>
+        <p class="text-muted">${'★'.repeat(Math.round(p.rating||0))}</p>
+        ${descHTML}
+        <h3 class="price">Rp ${Number(p.price).toLocaleString('id-ID')}</h3>
+        <div class="quantity mt-3">
+          <button class="qty-btn" id="minus" type="button" aria-label="Decrease quantity">
+            <svg viewBox="0 0 24 24" width="16" height="16" role="img" aria-hidden="true" focusable="false">
+              <path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"></path>
+            </svg>
+          </button>
+          <span class="qty-number" id="qty">1</span>
+          <button class="qty-btn" id="plus" type="button" aria-label="Increase quantity">
+            <svg viewBox="0 0 24 24" width="16" height="16" role="img" aria-hidden="true" focusable="false">
+              <path d="M12 5v14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"></path>
+              <path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"></path>
+            </svg>
+          </button>
+        </div>
+        <button id="add-cart" class="btn btn-primary w-100 mt-4">🛒 Tambah ke Keranjang</button>
+      </div>
+    `;
+
+    // update cart count in navbar (if present)
+    const cartCountEl = document.getElementById('cart-count');
+    if (cartCountEl) cartCountEl.textContent = Number(localStorage.getItem('cartCount') || 0);
+    window.addEventListener('storage', ()=>{ if (cartCountEl) cartCountEl.textContent = Number(localStorage.getItem('cartCount') || 0); });
+
+    // quantity handlers with simple animation
+    let qty = 1;
+    const minusBtn = document.getElementById('minus');
+    const plusBtn = document.getElementById('plus');
+    const qtyText = document.getElementById('qty');
+    function animateQty(){ qtyText.classList.add('qty-animate'); setTimeout(()=>qtyText.classList.remove('qty-animate'),150); }
+    plusBtn.addEventListener('click', ()=>{ qty++; qtyText.textContent = qty; animateQty(); });
+    minusBtn.addEventListener('click', ()=>{ if (qty>1){ qty--; qtyText.textContent = qty; animateQty(); } });
+
+    // add to cart (structured)
+    document.getElementById('add-cart').addEventListener('click', async ()=>{
+      // maintain cartItems array
+      const raw = localStorage.getItem('cartItems');
+      let items = raw ? JSON.parse(raw) : [];
+      const existing = items.find(it => Number(it.id) === Number(p.id));
+      if (existing) existing.qty = Number(existing.qty) + Number(qty);
+      else items.push({ id: Number(p.id), qty: Number(qty) });
+      localStorage.setItem('cartItems', JSON.stringify(items));
+      const total = items.reduce((s,i)=>s+Number(i.qty),0);
+      localStorage.setItem('cartCount', total);
+      if (typeof pulseCartBadge === 'function') pulseCartBadge();
+      await showAlert('Ditambahkan ' + qty + ' x ' + p.title + ' ke keranjang', 'Berhasil');
+    });
+
+    // cart-link return behavior handled by centralized navbar.js
+
+    // back button behavior is handled centrally by navbar.js
+
+    // play enter animation if signaled (navigated back from cart)
+    if (sessionStorage.getItem('playDetailEnter') === '1'){
+      sessionStorage.removeItem('playDetailEnter');
+      const root = document.getElementById('detail-root');
+      if (root){ root.classList.add('detail-enter'); setTimeout(()=>root.classList.remove('detail-enter'), 600); }
+    }
+
+  }).catch(err=>{
+    document.getElementById('detail-root').innerHTML = '<p class="text-danger">Gagal memuat data produk.</p>';
+  });
+});
+</script>
+
+</div>
+
+</body>
+</html>

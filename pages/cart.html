@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>SkyFood - Keranjang</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<div data-insert-navbar data-page="cart"></div>
+
+<div class="container mt-5 pt-4">
+  <div class="row">
+    <div class="col-lg-8">
+      <h5>Alamat Pengiriman</h5>
+      <div class="mb-3">
+        <textarea id="shipping-address" class="form-control" rows="3" placeholder="Masukkan alamat pengiriman lengkap"></textarea>
+      </div>
+
+      <h5>Opsi Pengiriman</h5>
+      <div class="mb-3">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="shipping" id="ship-standard" value="standard" checked>
+          <label class="form-check-label" for="ship-standard">Standar (30-45 menit) - Rp 10.000</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="shipping" id="ship-express" value="express">
+          <label class="form-check-label" for="ship-express">Express (15-25 menit) - Rp 25.000</label>
+        </div>
+      </div>
+
+      <h5>Produk di Keranjang</h5>
+      <div id="cart-items" class="list-group mb-3">
+        <!-- items loaded by JS -->
+      </div>
+
+      <h5>Promo</h5>
+      <div class="input-group mb-3">
+        <input id="promo-code" type="text" class="form-control" placeholder="Masukkan kode promo (opsional)">
+        <button id="apply-promo" class="btn btn-outline-primary">Terapkan</button>
+      </div>
+
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card p-3">
+        <h6>Ringkasan Pesanan</h6>
+        <div id="invoice-lines" class="mb-2">
+          <!-- invoice lines -->
+        </div>
+        <hr>
+        <div class="d-flex justify-content-between">
+          <strong>Total</strong>
+          <strong id="invoice-total">Rp 0</strong>
+        </div>
+        <button id="checkout" class="btn btn-primary w-100 mt-3">Checkout</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation modal (simple) -->
+<div id="checkout-modal" class="modal" tabindex="-1" style="display:none;">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Konfirmasi Checkout</h5>
+        <button type="button" class="btn-close" id="close-modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="confirm-invoice"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancel-checkout" class="btn btn-outline-secondary">Batal</button>
+        <button id="confirm-checkout" class="btn btn-primary">Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- shared navbar + UI modals -->
+<script src="../assets/js/navbar.js"></script>
+<script src="../assets/js/ui-modals.js"></script>
+
+<script>
+// load products and cartItems
+function formatRupiah(n){ return 'Rp ' + Number(n).toLocaleString('id-ID'); }
+
+function updateCartBadge(){
+  const count = Number(localStorage.getItem('cartCount') || 0);
+  const btn = document.querySelector('.navbar-glass .cart'); if (btn) btn.textContent = '🛒 ' + count;
+}
+
+function loadCart(){
+  const itemsRaw = localStorage.getItem('cartItems');
+  if (!itemsRaw) return [];
+  try {
+    const parsed = JSON.parse(itemsRaw);
+    if (Array.isArray(parsed)) return parsed;
+    if (parsed && typeof parsed === 'object') {
+      // convert object-like storage into array
+      try { return Object.keys(parsed).map(k => parsed[k]).filter(Boolean); } catch(e) { return []; }
+    }
+    return [];
+  } catch(e){
+    // attempt a best-effort fix for common mistakes (single quotes)
+    try {
+      const fixed = itemsRaw.replace(/'/g, '"');
+      const parsed2 = JSON.parse(fixed);
+      if (Array.isArray(parsed2)) { localStorage.setItem('cartItems', JSON.stringify(parsed2)); return parsed2; }
+    } catch(e2){ /* ignore */ }
+    console.warn('cartItems corrupted; clearing cartItems to recover', e);
+    localStorage.removeItem('cartItems');
+    localStorage.setItem('cartCount', 0);
+    return [];
+  }
+}
+
+let productsData = [];
+fetch('../assets/data/products.json').then(r=>r.json()).then(list=>{ productsData = list; renderCart(); updateCartBadge(); }).catch(()=>{ productsData = []; renderCart(); });
+
+function findProduct(id){ return productsData.find(p=>Number(p.id)===Number(id)); }
+
+function renderCart(){
+  const container = document.getElementById('cart-items');
+  const invoiceLines = document.getElementById('invoice-lines');
+  container.innerHTML = '';
+  invoiceLines.innerHTML = '';
+  const items = loadCart();
+  if (items.length===0){ container.innerHTML = '<p class="text-muted">Keranjang kosong.</p>'; document.getElementById('invoice-total').textContent = formatRupiah(0); return; }
+  let subtotal = 0;
+  items.forEach(it => {
+    const p = findProduct(it.id);
+    const price = p ? Number(p.price) : 0;
+    const qty = Number(it.qty);
+    const lineTotal = price * qty;
+    subtotal += lineTotal;
+    const row = document.createElement('div'); row.className = 'list-group-item d-flex gap-3 align-items-center';
+    row.innerHTML = `
+      <img src="${p ? ('../' + p.img) : '../assets/img/placeholder.png'}" alt="${p ? p.title : ''}" style="width:84px;height:84px;object-fit:cover;border-radius:8px;">
+      <div class="flex-grow-1">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="fw-semibold">${p ? p.title : 'Produk tidak ditemukan'}</div>
+            <div class="text-muted small mt-1">${formatRupiah(price)}</div>
+          </div>
+          <div class="text-end">
+            <div class="mb-2">${formatRupiah(lineTotal)}</div>
+            <div class="d-flex align-items-center gap-2">
+              <button class="btn btn-sm btn-outline-secondary btn-decr">−</button>
+              <div class="px-2">${qty}</div>
+              <button class="btn btn-sm btn-outline-secondary btn-incr">+</button>
+              <button class="btn btn-sm btn-outline-danger btn-del ms-2" title="Hapus item">🗑</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    // attach qty buttons
+    row.querySelector('.btn-decr').addEventListener('click', async ()=>{
+      const newQty = Math.max(0, qty-1);
+      if (newQty === 0){
+        const ok = await showConfirm('Hapus produk dari keranjang?', 'Konfirmasi');
+        if (ok) removeItem(it.id);
+      } else {
+        updateItemQty(it.id, newQty);
+      }
+    });
+    row.querySelector('.btn-incr').addEventListener('click', ()=>{ updateItemQty(it.id, qty+1); });
+    // delete button
+    row.querySelector('.btn-del').addEventListener('click', async ()=>{ const ok = await showConfirm('Hapus produk dari keranjang?', 'Konfirmasi'); if (ok) removeItem(it.id); });
+    container.appendChild(row);
+
+    // invoice line
+    const inv = document.createElement('div'); inv.className='d-flex justify-content-between small'; inv.innerHTML = `<div>${p ? p.title : 'Item' } x ${qty}</div><div>${formatRupiah(lineTotal)}</div>`;
+    invoiceLines.appendChild(inv);
+  });
+  // shipping cost
+  const shippingEl = document.querySelector('input[name="shipping"]:checked');
+  const shippingCost = shippingEl && shippingEl.value === 'express' ? 25000 : 10000;
+  const promo = localStorage.getItem('cartPromo') || '';
+  let discount = 0;
+  if (promo === 'DISC10') discount = Math.round(subtotal * 0.1);
+
+  const shipRow = document.createElement('div'); shipRow.className='d-flex justify-content-between small'; shipRow.innerHTML = `<div>Biaya Pengiriman</div><div>${formatRupiah(shippingCost)}</div>`;
+  invoiceLines.appendChild(shipRow);
+  if (discount>0){ const discRow = document.createElement('div'); discRow.className='d-flex justify-content-between small text-success'; discRow.innerHTML = `<div>Diskon (${promo})</div><div>-${formatRupiah(discount)}</div>`; invoiceLines.appendChild(discRow); }
+
+  const total = subtotal + shippingCost - discount;
+  document.getElementById('invoice-total').textContent = formatRupiah(total);
+}
+
+function updateItemQty(id, qty){
+  let items = loadCart();
+  const idx = items.findIndex(it=>Number(it.id)===Number(id));
+  if (idx===-1) return;
+  items[idx].qty = qty;
+  localStorage.setItem('cartItems', JSON.stringify(items));
+  const total = items.reduce((s,i)=>s+Number(i.qty),0);
+  localStorage.setItem('cartCount', total);
+  renderCart(); updateCartBadge();
+}
+
+function removeItem(id){
+  let items = loadCart();
+  items = items.filter(it=>Number(it.id)!==Number(id));
+  localStorage.setItem('cartItems', JSON.stringify(items));
+  const total = items.reduce((s,i)=>s+Number(i.qty),0);
+  localStorage.setItem('cartCount', total);
+  renderCart(); updateCartBadge();
+}
+
+// apply promo
+document.getElementById('apply-promo').addEventListener('click', async ()=>{
+  const code = document.getElementById('promo-code').value.trim();
+  if (!code) return await showAlert('Masukkan kode promo', 'Promo');
+  // very simple promo: DISC10 = 10% off
+  if (code === 'DISC10'){
+    localStorage.setItem('cartPromo', code);
+    await showAlert('Promo diterapkan: 10% off', 'Promo');
+  } else {
+    localStorage.removeItem('cartPromo');
+    await showAlert('Kode tidak valid', 'Promo');
+  }
+  renderCart();
+});
+
+// shipping change
+Array.from(document.querySelectorAll('input[name="shipping"]')).forEach(r=>r.addEventListener('change', ()=>{ renderCart(); }));
+
+// checkout flow using ui modal helpers (animated + blurred backdrop)
+document.getElementById('checkout').addEventListener('click', async ()=>{
+  const addr = document.getElementById('shipping-address').value.trim();
+  if (!addr) return await showAlert('Masukkan alamat pengiriman', 'Alamat');
+
+  // Build invoice HTML to show inside modal
+  const invoiceHtml = document.getElementById('invoice-lines').innerHTML + `\n<hr>\n<div class="d-flex justify-content-between"><strong>Total</strong><strong>${document.getElementById('invoice-total').textContent}</strong></div>`;
+  const confirmed = await showConfirm(invoiceHtml, 'Konfirmasi Checkout');
+  if (!confirmed) return; // user cancelled
+
+  // proceed with checkout
+  localStorage.removeItem('cartItems');
+  localStorage.removeItem('cartPromo');
+  localStorage.setItem('cartCount', 0);
+    // show success and redirect to dashboard after user confirms
+    await showAlert('Checkout berhasil. Terima kasih!', 'Sukses');
+    // clear any stored return target
+    try{ sessionStorage.removeItem('returnTo'); }catch(e){}
+    // navigate back to dashboard
+  location.href = '../index.html';
+});
+
+</script>
+
+</body>
+</html>
